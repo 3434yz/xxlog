@@ -18,5 +18,3 @@ public:
 private:
   void log(LogLevel level, std::string_view msg);
 };
-
-class LoggerFactory {}
