@@ -34,6 +34,24 @@ void Logger::log(LogLevel level, const char *file, int line,
     return;
 
   std::lock_guard<std::mutex> lock(mtx);
+  std::string timeStr = getTime();
+  std::string levelStr = levelToString(level);
+
+  std::ostringstream oss;
+  oss << "[" << timeStr << "][" << levelStr << "][" << file << ":" << line
+      << "] " << msg << "\n";
+
+  std::string logLine = oss.str();
+
+  // 输出到控制台
+  std::cout << logLine;
+  std::cout.flush();
+
+  // 输出到文件
+  if (fileStream.is_open()) {
+    fileStream << logLine;
+    fileStream.flush();
+  }
 }
 
 std::string Logger::getTime() {
