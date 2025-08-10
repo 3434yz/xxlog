@@ -3,6 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 
 namespace xxlog {
 
@@ -11,20 +12,26 @@ enum class LogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };
 class Logger {
 public:
   static Logger &instance();
-  void setLevel(LogLevel level);
-  void setLogFile(const std::string &filepath);
+
+  Logger(const Logger &) = delete;
+  Logger &operator=(const Logger &) = delete;
+
   void log(LogLevel level, const char *file, int line, const std::string &msg);
+
+  void set_level(LogLevel level);
+  void set_log_file(const std::string &filepath);
 
 private:
   Logger();
   ~Logger();
 
-  std::string getTime();
-  std::string levelToString(LogLevel level);
+  std::string get_time();
 
-  LogLevel currentLevel;
-  std::ofstream fileStream;
+  static constexpr std::string_view level_to_string(LogLevel level) noexcept;
+
+  LogLevel m_current_level;
   std::mutex mtx;
+  std::unique_ptr<std::ofstream> m_file_stream;
 };
 
 } // namespace xxlog
