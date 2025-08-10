@@ -1,20 +1,33 @@
 #pragma once
-#include <string_view>
+#include <fstream>
+#include <memory>
+#include <mutex>
+#include <string>
 
-enum class LogLevel { Debug, Info, Warn, Error };
+namespace xxlog {
+
+enum class LogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };
 
 class Logger {
 public:
+  static Logger &instance();
   void setLevel(LogLevel level);
-
-  template <typename... Args> void info(std::string_view msg, Args &&...args) {
-    log(LogLevel::Info, msg, std::forward<Args>(args)...);
-  }
-
-  template <typename... Args> void error(std::string_view msg, Args &&...args) {
-    log(LogLevel::Error, msg, std::forward<Args>(args)...);
-  }
+  void setLogFile(const std::string &filepath);
+  void log(LogLevel level, const char *file, int line, const std::string &msg);
 
 private:
-  void log(LogLevel level, std::string_view msg);
+  Logger();
+  ~Logger();
+
+  std::string getTime();
+  std::string levelToString(LogLevel level);
+
+  LogLevel currentLevel;
+  std::ofstream fileStream;
+  std::mutex mtx;
 };
+
+} // namespace xxlog
+
+#define XXLOG(level, msg)                                                      \
+  xxlog::Logger::instance().log(level, __FILE__, __LINE__, msg)
